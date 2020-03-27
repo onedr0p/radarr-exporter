@@ -1,5 +1,33 @@
 # radarr-exporter
 
+Prometheus Exporter for Radarr
+
+[![Docker Pulls](https://img.shields.io/docker/pulls/onedr0p/radarr-exporter)](https://hub.docker.com/r/onedr0p/radarr-exporter)
+
+## Usage
+
+|Name             |Description                                                  |Default|
+|-----------------|-------------------------------------------------------------|-------|
+|`RADARR_HOSTNAME`|You Radarr instance's URL                                    |       |
+|`RADARR_APIKEY`  |Your Radarr instance's API Key                               |       |
+|`INTERVAL`       |The duration of which the exporter will scrape the Radarr API|`2m`   |
+|`PORT`           |The port the exporter will listen on                         |`9811` |
+
+### Docker Compose Example
+
+```yaml
+version: '3.7'
+services:
+  radarr-exporter:
+    image: onedr0p/radarr-exporter:v1.0.0
+    environment:
+      RADARR_HOSTNAME: "http://localhost:7878"
+      RADARR_APIKEY: "..."
+      INTERVAL: "1h"
+```
+
+### Metrics
+
 ```bash
 # TYPE radarr_history_total gauge
 radarr_history_total{hostname="http://localhost:7878"} 5925
