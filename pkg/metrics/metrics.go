@@ -25,6 +25,26 @@ var (
 		[]string{"hostname"},
 	)
 
+	// MovieMonitored - Total number of Movies monitored
+	MovieMonitored = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name:      "movie_monitored_total",
+			Namespace: "radarr",
+			Help:      "Total number of monitored movies",
+		},
+		[]string{"hostname"},
+	)
+
+	// MovieUnmonitored - Total number of Movies unmonitored
+	MovieUnmonitored = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name:      "movie_unmonitored_total",
+			Namespace: "radarr",
+			Help:      "Total number of unmonitored movies",
+		},
+		[]string{"hostname"},
+	)
+
 	// MovieQualities - Total number of Movies by Quality
 	MovieQualities = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
@@ -100,6 +120,8 @@ var (
 func Init() {
 	prometheus.MustRegister(Movie)
 	prometheus.MustRegister(MovieDownloaded)
+	prometheus.MustRegister(MovieMonitored)
+	prometheus.MustRegister(MovieUnmonitored)
 	prometheus.MustRegister(MovieQualities)
 	prometheus.MustRegister(Wanted)
 	prometheus.MustRegister(Status)

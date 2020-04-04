@@ -53,10 +53,13 @@ func (c *Client) Scrape() {
 			metrics.Status.WithLabelValues(c.hostname).Set(1.0)
 		}
 
-		// Movies, Downloaded Movies and Downloaded Movies by Quality Name
+		// Movies, Downloaded Movies, Downloaded Movies by Quality Name
+		// Monitored, Unmonitored
 		var (
-			moviesDownloaded = 0
-			moviesQualities  = map[string]int{}
+			moviesDownloaded  = 0
+			moviesMonitored   = 0
+			moviesUnmonitored = 0
+			moviesQualities   = map[string]int{}
 		)
 		movies := Movie{}
 		c.apiRequest(fmt.Sprintf(apiUrlPattern, c.hostname, "movie"), &movies)
@@ -64,14 +67,23 @@ func (c *Client) Scrape() {
 			if s.HasFile == true {
 				moviesDownloaded++
 			}
+			if s.Monitored == true {
+				moviesMonitored++
+			} else {
+				moviesUnmonitored++
+			}
 			moviesQualities[s.MovieFile.Quality.Quality.Name]++
 		}
 		metrics.Movie.WithLabelValues(c.hostname).Set(float64(len(movies)))
 		metrics.MovieDownloaded.WithLabelValues(c.hostname).Set(float64(moviesDownloaded))
+		metrics.MovieMonitored.WithLabelValues(c.hostname).Set(float64(moviesMonitored))
+		metrics.MovieUnmonitored.WithLabelValues(c.hostname).Set(float64(moviesUnmonitored))
 
 		for qualityName, count := range moviesQualities {
 			metrics.MovieQualities.WithLabelValues(c.hostname, qualityName).Set(float64(count))
 		}
+
+		//
 
 		// History
 		history := History{}

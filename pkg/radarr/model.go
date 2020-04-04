@@ -39,6 +39,7 @@ type Health []struct {
 // Movie - Stores struct of JSON response
 type Movie []struct {
 	HasFile   bool `json:"hasFile"`
+	Monitored bool `json:"monitored"`
 	MovieFile struct {
 		Quality struct {
 			Quality struct {
