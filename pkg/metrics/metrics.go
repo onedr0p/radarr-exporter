@@ -95,12 +95,22 @@ var (
 		[]string{"hostname"},
 	)
 
+	// FileSize - Total size of all Movies
+	FileSize = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name:      "movies_bytes",
+			Namespace: "radarr",
+			Help:      "Total file size of all movies in bytes",
+		},
+		[]string{"hostname"},
+	)
+
 	// RootFolder - Space by Root Folder
 	RootFolder = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Name:      "root_folder_space",
+			Name:      "rootfolder_freespace_bytes",
 			Namespace: "radarr",
-			Help:      "Root folder space",
+			Help:      "Root folder space in bytes",
 		},
 		[]string{"hostname", "folder"},
 	)
@@ -127,6 +137,7 @@ func Init() {
 	prometheus.MustRegister(Status)
 	prometheus.MustRegister(History)
 	prometheus.MustRegister(Queue)
+	prometheus.MustRegister(FileSize)
 	prometheus.MustRegister(RootFolder)
 	prometheus.MustRegister(Health)
 }

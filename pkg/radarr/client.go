@@ -54,7 +54,9 @@ func (c *Client) Scrape() {
 		}
 
 		// Movies, Downloaded Movies, Downloaded Movies by Quality Name
-		// Monitored, Unmonitored
+		// Monitored, Unmonitored, FileSize
+		var moviesFileSize int64
+
 		var (
 			moviesDownloaded  = 0
 			moviesMonitored   = 0
@@ -72,9 +74,11 @@ func (c *Client) Scrape() {
 			} else {
 				moviesUnmonitored++
 			}
-			// Movies without file don't have a quality
 			if s.MovieFile.Quality.Quality.Name != "" {
 				moviesQualities[s.MovieFile.Quality.Quality.Name]++
+			}
+			if s.MovieFile.Size != 0 {
+				moviesFileSize += s.MovieFile.Size
 			}
 		}
 		metrics.Movie.WithLabelValues(c.hostname).Set(float64(len(movies)))
@@ -85,6 +89,8 @@ func (c *Client) Scrape() {
 		for qualityName, count := range moviesQualities {
 			metrics.MovieQualities.WithLabelValues(c.hostname, qualityName).Set(float64(count))
 		}
+
+		metrics.FileSize.WithLabelValues(c.hostname).Set(float64(moviesFileSize))
 
 		// History
 		history := History{}
