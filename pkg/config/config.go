@@ -28,7 +28,7 @@ func getDefaultConfig() *Config {
 		ApiKey:   "",
 
 		Port:     "9811",
-		Interval: 120 * time.Second,
+		Interval: 10 * time.Minute,
 	}
 }
 
