@@ -98,7 +98,7 @@ var (
 	// FileSize - Total size of all Movies
 	FileSize = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Name:      "movies_bytes",
+			Name:      "movie_bytes",
 			Namespace: "radarr",
 			Help:      "Total file size of all movies in bytes",
 		},
