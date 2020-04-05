@@ -90,7 +90,7 @@ var (
 		prometheus.GaugeOpts{
 			Name:      "queue_total",
 			Namespace: "radarr",
-			Help:      "Total number of movies in queue",
+			Help:      "Total number of movies in queue by status",
 		},
 		[]string{"hostname", "status"},
 	)

@@ -65,9 +65,10 @@ radarr_movie_unmonitored_total{hostname="http://localhost:7878"} 4662
 # HELP radarr_movies_bytes Total file size of all movies in bytes
 # TYPE radarr_movies_bytes gauge
 radarr_movies_bytes{hostname="http://localhost:7878"} 2.3326478328365e+13
-# HELP radarr_queue_total Total number of movies in queue
+# HELP radarr_queue_total Total number of movies in queue by status
 # TYPE radarr_queue_total gauge
-radarr_queue_total{hostname="http://localhost:7878"} 9
+radarr_queue_total{hostname="http://localhost:7878",status="Ok"} 1
+radarr_queue_total{hostname="http://localhost:7878",status="Warning"} 9
 # HELP radarr_root_folder_space_bytes Root folder space in bytes
 # TYPE radarr_root_folder_space_bytes gauge
 radarr_rootfolder_freespace_bytes{folder="/media/Library/Movies/",hostname="http://localhost:7878"} 2.5011930497024e+13
