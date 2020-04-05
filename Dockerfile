@@ -1,8 +1,7 @@
 FROM golang:1.14-alpine as build
 
 ENV GO111MODULE=on \
-    CGO_ENABLED=0 \
-    GOOS=linux
+    CGO_ENABLED=0
 
 RUN apk add --no-cache curl ca-certificates git alpine-sdk upx
 
