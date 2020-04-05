@@ -64,7 +64,7 @@ radarr_movie_total{hostname="http://localhost:7878"} 4817
 radarr_movie_unmonitored_total{hostname="http://localhost:7878"} 4662
 # HELP radarr_movies_bytes Total file size of all movies in bytes
 # TYPE radarr_movies_bytes gauge
-radarr_movies_bytes{hostname="http://localhost:7878"} 2.3326478328365e+13
+radarr_movie_bytes{hostname="http://localhost:7878"} 2.3326478328365e+13
 # HELP radarr_queue_total Total number of movies in queue by status
 # TYPE radarr_queue_total gauge
 radarr_queue_total{hostname="http://localhost:7878",status="Ok"} 1
