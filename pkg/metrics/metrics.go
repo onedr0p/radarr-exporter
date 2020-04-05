@@ -92,7 +92,7 @@ var (
 			Namespace: "radarr",
 			Help:      "Total number of movies in queue",
 		},
-		[]string{"hostname"},
+		[]string{"hostname", "status"},
 	)
 
 	// FileSize - Total size of all Movies

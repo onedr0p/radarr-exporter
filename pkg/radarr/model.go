@@ -15,8 +15,14 @@ type SystemStatus struct {
 
 // Queue - Stores struct of JSON response
 type Queue []struct {
-	Title string `json:"title"`
-	Size  int32  `json:"size"`
+	Title                 string `json:"title"`
+	Size                  int32  `json:"size"`
+	Status                string `json:"status"`
+	TrackedDownloadStatus string `json:"trackedDownloadStatus"`
+	StatusMessages        []struct {
+		Title    string   `json:"title"`
+		Messages []string `json:"messages"`
+	} `json:"statusMessages"`
 }
 
 // History - Stores struct of JSON response

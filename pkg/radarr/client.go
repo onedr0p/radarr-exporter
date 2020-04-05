@@ -14,7 +14,7 @@ var (
 	apiUrlPattern = "%s/api/%s"
 )
 
-// Client struct is a Sonarr client to request an instance of a Sonarr
+// Client struct is a Radarr client to request an instance of a Radarr
 type Client struct {
 	httpClient http.Client
 	interval   time.Duration
@@ -22,7 +22,7 @@ type Client struct {
 	apiKey     string
 }
 
-// NewClient method initializes a new Sonarr client.
+// NewClient method initializes a new Radarr client.
 func NewClient(hostname, apiKey string, interval time.Duration) *Client {
 	return &Client{
 		hostname: hostname,
@@ -36,7 +36,7 @@ func NewClient(hostname, apiKey string, interval time.Duration) *Client {
 	}
 }
 
-// Scrape method logins and retrieves statistics from Sonarr JSON API
+// Scrape method logins and retrieves statistics from Radarr JSON API
 // and then pass them as Prometheus metrics.
 func (c *Client) Scrape() {
 	for range time.Tick(c.interval) {
@@ -102,10 +102,18 @@ func (c *Client) Scrape() {
 		c.apiRequest(fmt.Sprintf(apiUrlPattern, c.hostname, "wanted/missing"), &wanted)
 		metrics.Wanted.WithLabelValues(c.hostname).Set(float64(wanted.TotalRecords))
 
-		// Queue
+		// Queue by Status
+		var queueStatus = map[string]int{}
 		queue := Queue{}
 		c.apiRequest(fmt.Sprintf(apiUrlPattern, c.hostname, "queue"), &queue)
-		metrics.Queue.WithLabelValues(c.hostname).Set(float64(len(queue)))
+		for _, s := range queue {
+			if s.TrackedDownloadStatus != "" {
+				queueStatus[s.TrackedDownloadStatus]++
+			}
+		}
+		for trackedDownloadStatus, count := range queueStatus {
+			metrics.Queue.WithLabelValues(c.hostname, trackedDownloadStatus).Set(float64(count))
+		}
 
 		// Root Folder
 		rootFolders := RootFolder{}
@@ -140,7 +148,7 @@ func (c *Client) apiRequest(endpoint string, target interface{}) error {
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		log.Fatal("An error has occured during retrieving Sonarr statistics", err)
+		log.Fatal("An error has occured during retrieving Radarr statistics", err)
 		return err
 	}
 
