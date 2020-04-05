@@ -14,7 +14,7 @@ RUN export GOOS=$(echo ${TARGETPLATFORM} | cut -d / -f1) \
     && GOARM=$(echo ${TARGETPLATFORM} | cut -d / -f3); export GOARM=${GOARM:1} \
     && go mod vendor \
     && go build -o radarr-exporter ./cmd/radarr-exporter/ \
-    && upx -f --brute radarr-exporter
+    && upx -f --brute radarr-exporter \
     && chmod +x radarr-exporter
 
 FROM alpine:3.11
