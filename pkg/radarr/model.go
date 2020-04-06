@@ -37,9 +37,9 @@ type WantedMissing struct {
 
 // Health - Stores struct of JSON response
 type Health []struct {
-	Type    string `json:type`
-	Message string `json:message`
-	WikiURL string `json:wikiUrl`
+	Type    string `json:"type"`
+	Message string `json:"message"`
+	WikiURL string `json:"wikiUrl"`
 }
 
 // Movie - Stores struct of JSON response
