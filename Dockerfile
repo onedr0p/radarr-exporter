@@ -11,7 +11,7 @@ COPY . .
 RUN export GOOS=$(echo ${TARGETPLATFORM} | cut -d / -f1) \
     && export GOARCH=$(echo ${TARGETPLATFORM} | cut -d / -f2) \
     && GOARM=$(echo ${TARGETPLATFORM} | cut -d / -f3); export GOARM=${GOARM:1} \
-    && go mod vendor \
+    && go mod download \
     && go build -a -tags netgo -ldflags '-w -extldflags "-static"' -o radarr-exporter ./cmd/radarr-exporter/ \
     && upx -f --brute radarr-exporter \
     && chmod +x radarr-exporter

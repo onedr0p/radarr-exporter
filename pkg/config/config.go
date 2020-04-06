@@ -18,8 +18,9 @@ type Config struct {
 	Hostname string `config:"radarr_hostname"`
 	ApiKey   string `config:"radarr_apikey"`
 
-	Port     string        `config:"port"`
-	Interval time.Duration `config:"interval"`
+	Port         string        `config:"port"`
+	Interval     time.Duration `config:"interval"`
+	StartupDelay time.Duration `config:"startup_delay"`
 }
 
 func getDefaultConfig() *Config {
@@ -27,8 +28,9 @@ func getDefaultConfig() *Config {
 		Hostname: "127.0.0.1",
 		ApiKey:   "",
 
-		Port:     "9811",
-		Interval: 10 * time.Minute,
+		Port:         "9811",
+		Interval:     10 * time.Minute,
+		StartupDelay: 0 * time.Second,
 	}
 }
 

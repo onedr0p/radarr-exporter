@@ -32,7 +32,7 @@ func NewClient(hostname, apiKey string, interval time.Duration) *Client {
 	}
 }
 
-// Scrape method logins and retrieves statistics from Radarr JSON API
+// Scrape method logs in and retrieves statistics from Radarr JSON API
 // and then pass them as Prometheus metrics.
 func (c *Client) Scrape() {
 	for range time.Tick(c.interval) {
@@ -56,17 +56,21 @@ func (c *Client) Scrape() {
 		var (
 			moviesDownloaded  = 0
 			moviesMonitored   = 0
+			moviesMissing     = 0
 			moviesUnmonitored = 0
 			moviesQualities   = map[string]int{}
 		)
 		movies := Movie{}
 		c.apiRequest(fmt.Sprintf("%s/api/%s", c.hostname, "movie"), &movies)
 		for _, s := range movies {
-			if s.HasFile == true {
+			if s.HasFile {
 				moviesDownloaded++
 			}
-			if s.Monitored == true {
+			if s.Monitored {
 				moviesMonitored++
+				if !s.HasFile && s.Status == "released" {
+					moviesMissing++
+				}
 			} else {
 				moviesUnmonitored++
 			}
@@ -80,6 +84,7 @@ func (c *Client) Scrape() {
 		metrics.Movie.WithLabelValues(c.hostname).Set(float64(len(movies)))
 		metrics.MovieDownloaded.WithLabelValues(c.hostname).Set(float64(moviesDownloaded))
 		metrics.MovieMonitored.WithLabelValues(c.hostname).Set(float64(moviesMonitored))
+		metrics.MovieMissing.WithLabelValues(c.hostname).Set(float64(moviesMissing))
 		metrics.MovieUnmonitored.WithLabelValues(c.hostname).Set(float64(moviesUnmonitored))
 
 		for qualityName, count := range moviesQualities {

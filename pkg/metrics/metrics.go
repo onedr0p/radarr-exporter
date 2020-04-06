@@ -35,6 +35,16 @@ var (
 		[]string{"hostname"},
 	)
 
+	// MovieMissing - Total number of Movies missing
+	MovieMissing = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name:      "movie_missing_total",
+			Namespace: "radarr",
+			Help:      "Total number of missing movies",
+		},
+		[]string{"hostname"},
+	)
+
 	// MovieUnmonitored - Total number of Movies unmonitored
 	MovieUnmonitored = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{

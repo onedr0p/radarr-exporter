@@ -24,6 +24,11 @@ var (
 func main() {
 	conf := config.Load()
 
+	if conf.StartupDelay.Seconds() > 0.0 {
+		fmt.Printf(fmt.Sprintf("Startup delay configured... sleeping for %v seconds", conf.StartupDelay.Seconds()))
+		time.Sleep(conf.StartupDelay)
+	}
+
 	metrics.Init()
 
 	initRadarrClient(conf.Hostname, conf.ApiKey, conf.Interval)
