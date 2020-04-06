@@ -115,14 +115,14 @@ var (
 		[]string{"hostname", "folder"},
 	)
 
-	// Health - Amount of health issues by type
+	// Health - Health issues with type and message
 	Health = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name:      "health_issues",
 			Namespace: "radarr",
-			Help:      "Amount of health issues in Radarr",
+			Help:      "Health issues in Radarr",
 		},
-		[]string{"hostname", "type"},
+		[]string{"hostname", "type", "message", "wikiurl"},
 	)
 )
 

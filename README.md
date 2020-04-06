@@ -75,4 +75,10 @@ radarr_rootfolder_freespace_bytes{folder="/media/Library/Movies/",hostname="http
 # HELP radarr_status System Status
 # TYPE radarr_status gauge
 radarr_status{hostname="http://localhost:7878"} 1
+# HELP radarr_health_issues Health issues in Radarr
+# TYPE radarr_health_issues gauge
+radarr_health_issues{hostname="http://localhost:7878",message="Branch develop is for a previous version of Radarr, set branch to 'Aphrodite' for further updates",type="error",wikiurl="https://github.com/Radarr/Radarr/wiki/Health-checks#branch-develop-is-for-a-previous-version-of-radarr-set-branch-to-aphrodite-for-further-updates"} 1
+radarr_health_issues{hostname="http://localhost:7878",message="No download client is available",type="warning",wikiurl="https://github.com/Radarr/Radarr/wiki/Health-checks#no-download-client-is-available"} 1
+radarr_health_issues{hostname="http://localhost:7878",message="No indexers available with Automatic Search enabled, Radarr will not provide any automatic search results",type="warning",wikiurl="https://github.com/Radarr/Radarr/wiki/Health-checks#no-indexers-available-with-automatic-search-enabled-radarr-will-not-provide-any-automatic-search-results"} 1
+radarr_health_issues{hostname="http://localhost:7878",message="No indexers available with RSS sync enabled, Radarr will not grab new releases automatically",type="error",wikiurl="https://github.com/Radarr/Radarr/wiki/Health-checks#no-indexers-available-with-rss-sync-enabled-radarr-will-not-grab-new-releases-automatically"} 1
 ```
