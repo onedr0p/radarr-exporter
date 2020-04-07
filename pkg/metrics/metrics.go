@@ -100,9 +100,9 @@ var (
 		prometheus.GaugeOpts{
 			Name:      "queue_total",
 			Namespace: "radarr",
-			Help:      "Total number of movies in queue by status",
+			Help:      "Total number of movies in queue",
 		},
-		[]string{"hostname", "status"},
+		[]string{"hostname", "status", "download_status", "download_state"},
 	)
 
 	// FileSize - Total size of all Movies
