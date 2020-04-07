@@ -38,96 +38,98 @@ func (c *Client) Scrape() {
 	for range time.Tick(c.interval) {
 
 		// System Status
-		status := SystemStatus{}
-		if err := c.apiRequest(fmt.Sprintf("%s/api/%s", c.hostname, "system/status"), &status); err != nil {
-			metrics.Status.WithLabelValues(c.hostname).Set(0.0)
+		systemStatus := SystemStatus{}
+		if err := c.apiRequest(fmt.Sprintf("%s/api/v3/%s", c.hostname, "system/status"), &systemStatus); err != nil {
+			metrics.SystemStatus.WithLabelValues(c.hostname).Set(0.0)
 			return
-		} else if (SystemStatus{}) == status {
-			metrics.Status.WithLabelValues(c.hostname).Set(0.0)
+		} else if (SystemStatus{}) == systemStatus {
+			metrics.SystemStatus.WithLabelValues(c.hostname).Set(0.0)
 			return
 		} else {
-			metrics.Status.WithLabelValues(c.hostname).Set(1.0)
+			metrics.SystemStatus.WithLabelValues(c.hostname).Set(1.0)
 		}
 
 		// Movies, Downloaded Movies, Downloaded Movies by Quality Name
 		// Monitored, Unmonitored, FileSize
-		var moviesFileSize int64
-
+		var fileSize int64
 		var (
-			moviesDownloaded  = 0
-			moviesMonitored   = 0
-			moviesMissing     = 0
-			moviesUnmonitored = 0
-			moviesQualities   = map[string]int{}
+			downloaded  = 0
+			monitored   = 0
+			unmonitored = 0
+			missing     = 0
+			wanted      = 0
+			qualities   = map[string]int{}
 		)
 		movies := Movie{}
-		c.apiRequest(fmt.Sprintf("%s/api/%s", c.hostname, "movie"), &movies)
+		c.apiRequest(fmt.Sprintf("%s/api/v3/%s", c.hostname, "movie"), &movies)
 		for _, s := range movies {
 			if s.HasFile {
-				moviesDownloaded++
+				downloaded++
 			}
 			if s.Monitored {
-				moviesMonitored++
+				monitored++
 				if !s.HasFile && s.Status == "released" {
-					moviesMissing++
+					missing++
+				} else if !s.HasFile {
+					wanted++
 				}
 			} else {
-				moviesUnmonitored++
+				unmonitored++
 			}
 			if s.MovieFile.Quality.Quality.Name != "" {
-				moviesQualities[s.MovieFile.Quality.Quality.Name]++
+				qualities[s.MovieFile.Quality.Quality.Name]++
 			}
 			if s.MovieFile.Size != 0 {
-				moviesFileSize += s.MovieFile.Size
+				fileSize += s.MovieFile.Size
 			}
 		}
 		metrics.Movie.WithLabelValues(c.hostname).Set(float64(len(movies)))
-		metrics.MovieDownloaded.WithLabelValues(c.hostname).Set(float64(moviesDownloaded))
-		metrics.MovieMonitored.WithLabelValues(c.hostname).Set(float64(moviesMonitored))
-		metrics.MovieMissing.WithLabelValues(c.hostname).Set(float64(moviesMissing))
-		metrics.MovieUnmonitored.WithLabelValues(c.hostname).Set(float64(moviesUnmonitored))
-
-		for qualityName, count := range moviesQualities {
-			metrics.MovieQualities.WithLabelValues(c.hostname, qualityName).Set(float64(count))
+		metrics.Downloaded.WithLabelValues(c.hostname).Set(float64(downloaded))
+		metrics.Monitored.WithLabelValues(c.hostname).Set(float64(monitored))
+		metrics.Unmonitored.WithLabelValues(c.hostname).Set(float64(unmonitored))
+		metrics.FileSize.WithLabelValues(c.hostname).Set(float64(fileSize))
+		metrics.Missing.WithLabelValues(c.hostname).Set(float64(missing))
+		metrics.Wanted.WithLabelValues(c.hostname).Set(float64(wanted))
+		for qualityName, count := range qualities {
+			metrics.Qualities.WithLabelValues(c.hostname, qualityName).Set(float64(count))
 		}
-
-		metrics.FileSize.WithLabelValues(c.hostname).Set(float64(moviesFileSize))
 
 		// History
 		history := History{}
-		c.apiRequest(fmt.Sprintf("%s/api/%s", c.hostname, "history"), &history)
+		c.apiRequest(fmt.Sprintf("%s/api/v3/%s", c.hostname, "history"), &history)
 		metrics.History.WithLabelValues(c.hostname).Set(float64(history.TotalRecords))
 
-		// Wanted
-		wanted := WantedMissing{}
-		c.apiRequest(fmt.Sprintf("%s/api/%s", c.hostname, "wanted/missing"), &wanted)
-		metrics.Wanted.WithLabelValues(c.hostname).Set(float64(wanted.TotalRecords))
-
-		// Queue by Status
-		var queueStatus = map[string]int{}
+		// Queue
 		queue := Queue{}
-		c.apiRequest(fmt.Sprintf("%s/api/%s", c.hostname, "queue"), &queue)
-		for _, s := range queue {
-			if s.TrackedDownloadStatus != "" {
-				queueStatus[s.TrackedDownloadStatus]++
+		c.apiRequest(fmt.Sprintf("%s/api/v3/%s", c.hostname, "queue"), &queue)
+		// Calculate total pages
+		var totalPages = (queue.TotalRecords + queue.PageSize - 1) / queue.PageSize
+		// Paginate
+		var queueStatusAll = make([]QueueRecords, 0, queue.TotalRecords)
+		queueStatusAll = append(queueStatusAll, queue.Records...)
+		if totalPages > 1 {
+			for page := 2; page <= totalPages; page++ {
+				c.apiRequest(fmt.Sprintf("%s/api/v3/%s?page=%d", c.hostname, "queue", page), &queue)
+				queueStatusAll = append(queueStatusAll, queue.Records...)
 			}
 		}
-		for trackedDownloadStatus, count := range queueStatus {
-			metrics.Queue.WithLabelValues(c.hostname, trackedDownloadStatus).Set(float64(count))
+		// Group Status, TrackedDownloadStatus and TrackedDownloadState
+		for i, s := range queueStatusAll {
+			metrics.Queue.WithLabelValues(c.hostname, s.Status, s.TrackedDownloadStatus, s.TrackedDownloadState).Set(float64(i + 1))
 		}
 
 		// Root Folder
 		rootFolders := RootFolder{}
-		c.apiRequest(fmt.Sprintf("%s/api/%s", c.hostname, "rootfolder"), &rootFolders)
+		c.apiRequest(fmt.Sprintf("%s/api/v3/%s", c.hostname, "rootfolder"), &rootFolders)
 		for _, rootFolder := range rootFolders {
 			metrics.RootFolder.WithLabelValues(c.hostname, rootFolder.Path).Set(float64(rootFolder.FreeSpace))
 		}
 
 		// Health Issues
-		health := Health{}
-		c.apiRequest(fmt.Sprintf("%s/api/%s", c.hostname, "health"), &health)
-		for _, h := range health {
-			metrics.Health.WithLabelValues(c.hostname, h.Type, h.Message, h.WikiURL).Set(float64(1))
+		systemHealth := SystemHealth{}
+		c.apiRequest(fmt.Sprintf("%s/api/v3/%s", c.hostname, "health"), &systemHealth)
+		for _, h := range systemHealth {
+			metrics.SystemHealth.WithLabelValues(c.hostname, h.Source, h.Type, h.Message, h.WikiURL).Set(float64(1))
 		}
 	}
 }

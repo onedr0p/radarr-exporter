@@ -29,6 +29,8 @@ services:
 
 ### Metrics
 
+> **Note:** Due to changes in versions, these may not reflect what is currently being exported.
+
 ```bash
 # HELP radarr_history_total Total number of records in history
 # TYPE radarr_history_total gauge

@@ -15,9 +15,8 @@ import (
 
 // Config is the exporter CLI configuration.
 type Config struct {
-	Hostname string `config:"radarr_hostname"`
-	ApiKey   string `config:"radarr_apikey"`
-
+	Hostname     string        `config:"radarr_hostname"`
+	ApiKey       string        `config:"radarr_apikey"`
 	Port         string        `config:"port"`
 	Interval     time.Duration `config:"interval"`
 	StartupDelay time.Duration `config:"startup_delay"`
@@ -25,9 +24,8 @@ type Config struct {
 
 func getDefaultConfig() *Config {
 	return &Config{
-		Hostname: "127.0.0.1",
-		ApiKey:   "",
-
+		Hostname:     "127.0.0.1",
+		ApiKey:       "",
 		Port:         "9811",
 		Interval:     10 * time.Minute,
 		StartupDelay: 0 * time.Second,

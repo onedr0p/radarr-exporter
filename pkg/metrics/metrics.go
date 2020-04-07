@@ -15,8 +15,8 @@ var (
 		[]string{"hostname"},
 	)
 
-	// MovieDownloaded - Total number of Movies downloaded
-	MovieDownloaded = prometheus.NewGaugeVec(
+	// Downloaded - Total number of Movies downloaded
+	Downloaded = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name:      "movie_download_total",
 			Namespace: "radarr",
@@ -25,8 +25,8 @@ var (
 		[]string{"hostname"},
 	)
 
-	// MovieMonitored - Total number of Movies monitored
-	MovieMonitored = prometheus.NewGaugeVec(
+	// Monitored - Total number of Movies monitored
+	Monitored = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name:      "movie_monitored_total",
 			Namespace: "radarr",
@@ -35,18 +35,8 @@ var (
 		[]string{"hostname"},
 	)
 
-	// MovieMissing - Total number of Movies missing
-	MovieMissing = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name:      "movie_missing_total",
-			Namespace: "radarr",
-			Help:      "Total number of missing movies",
-		},
-		[]string{"hostname"},
-	)
-
-	// MovieUnmonitored - Total number of Movies unmonitored
-	MovieUnmonitored = prometheus.NewGaugeVec(
+	// Unmonitored - Total number of Movies unmonitored
+	Unmonitored = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name:      "movie_unmonitored_total",
 			Namespace: "radarr",
@@ -55,18 +45,8 @@ var (
 		[]string{"hostname"},
 	)
 
-	// MovieQualities - Total number of Movies by Quality
-	MovieQualities = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name:      "movie_quality_total",
-			Namespace: "radarr",
-			Help:      "Total number of downloaded movies by quality",
-		},
-		[]string{"hostname", "quality"},
-	)
-
-	// Wanted - Total number of missing/wanted Movies
-	Wanted = prometheus.NewGaugeVec(
+	// Missing - Total number of Movies missing
+	Missing = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name:      "movie_missing_total",
 			Namespace: "radarr",
@@ -75,10 +55,30 @@ var (
 		[]string{"hostname"},
 	)
 
-	// Status - System Status
-	Status = prometheus.NewGaugeVec(
+	// Wanted - Total number of Movies wanted
+	Wanted = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Name:      "status",
+			Name:      "movie_wanted_total",
+			Namespace: "radarr",
+			Help:      "Total number of wanted movies",
+		},
+		[]string{"hostname"},
+	)
+
+	// Qualities - Total number of Movies by Quality
+	Qualities = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name:      "movie_quality_total",
+			Namespace: "radarr",
+			Help:      "Total number of downloaded movies by quality",
+		},
+		[]string{"hostname", "quality"},
+	)
+
+	// SystemStatus - System Status
+	SystemStatus = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name:      "system_status",
 			Namespace: "radarr",
 			Help:      "System Status",
 		},
@@ -125,29 +125,30 @@ var (
 		[]string{"hostname", "folder"},
 	)
 
-	// Health - Health issues with type and message
-	Health = prometheus.NewGaugeVec(
+	// SystemHealth - Health issues with type and message
+	SystemHealth = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Name:      "health_issues",
+			Name:      "system_health_issues",
 			Namespace: "radarr",
 			Help:      "Health issues in Radarr",
 		},
-		[]string{"hostname", "type", "message", "wikiurl"},
+		[]string{"hostname", "source", "type", "message", "wikiurl"},
 	)
 )
 
-// Init initializes all Prometheus metrics made available by PI-Hole exporter.
+// Init initializes all Prometheus metrics made available by Radarr exporter.
 func Init() {
 	prometheus.MustRegister(Movie)
-	prometheus.MustRegister(MovieDownloaded)
-	prometheus.MustRegister(MovieMonitored)
-	prometheus.MustRegister(MovieUnmonitored)
-	prometheus.MustRegister(MovieQualities)
+	prometheus.MustRegister(Downloaded)
+	prometheus.MustRegister(Monitored)
+	prometheus.MustRegister(Unmonitored)
+	prometheus.MustRegister(Missing)
 	prometheus.MustRegister(Wanted)
-	prometheus.MustRegister(Status)
+	prometheus.MustRegister(Qualities)
+	prometheus.MustRegister(SystemStatus)
 	prometheus.MustRegister(History)
 	prometheus.MustRegister(Queue)
 	prometheus.MustRegister(FileSize)
 	prometheus.MustRegister(RootFolder)
-	prometheus.MustRegister(Health)
+	prometheus.MustRegister(SystemHealth)
 }
