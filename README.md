@@ -8,7 +8,7 @@ Prometheus Exporter for Radarr
 
 |Name             |Description                                                  |Default|
 |-----------------|-------------------------------------------------------------|-------|
-|`RADARR_HOSTNAME`|You Radarr instance's URL                                    |       |
+|`RADARR_HOSTNAME`|Your Radarr instance's URL                                   |       |
 |`RADARR_APIKEY`  |Your Radarr instance's API Key                               |       |
 |`INTERVAL`       |The duration of which the exporter will call the Radarr API  |`10m`  |
 |`PORT`           |The port the exporter will listen on                         |`9811` |
