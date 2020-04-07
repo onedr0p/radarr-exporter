@@ -10,8 +10,9 @@ Prometheus Exporter for Radarr
 |-----------------|-------------------------------------------------------------|-------|
 |`RADARR_HOSTNAME`|You Radarr instance's URL                                    |       |
 |`RADARR_APIKEY`  |Your Radarr instance's API Key                               |       |
-|`INTERVAL`       |The duration of which the exporter will scrape the Radarr API|`10m`   
+|`INTERVAL`       |The duration of which the exporter will call the Radarr API  |`10m`  |
 |`PORT`           |The port the exporter will listen on                         |`9811` |
+|`STARTUP_DEPLY`  |The duration to wait before first calling the Radarr API     |       |
 
 ### Docker Compose Example
 
