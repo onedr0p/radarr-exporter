@@ -18,6 +18,7 @@ type Config struct {
 	Hostname     string        `config:"radarr_hostname"`
 	ApiKey       string        `config:"radarr_apikey"`
 	Port         string        `config:"port"`
+	AuthType     string        `config:"auth_type"`
 	Interval     time.Duration `config:"interval"`
 	StartupDelay time.Duration `config:"startup_delay"`
 }

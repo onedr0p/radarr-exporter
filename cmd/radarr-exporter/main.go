@@ -31,14 +31,14 @@ func main() {
 
 	metrics.Init()
 
-	initRadarrClient(conf.Hostname, conf.ApiKey, conf.Interval)
+	initRadarrClient(conf.Hostname, conf.ApiKey, conf.Interval, conf.AuthType)
 	initHttpServer(conf.Port)
 
 	handleExitSignal()
 }
 
-func initRadarrClient(hostname, apiKey string, interval time.Duration) {
-	client := radarr.NewClient(hostname, apiKey, interval)
+func initRadarrClient(hostname, apiKey string, interval time.Duration, authType string) {
+	client := radarr.NewClient(hostname, apiKey, interval, authType)
 	go client.Scrape()
 }
 

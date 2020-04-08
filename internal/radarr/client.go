@@ -1,6 +1,7 @@
 package radarr
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -17,14 +18,16 @@ type Client struct {
 	interval   time.Duration
 	hostname   string
 	apiKey     string
+	authType   string
 }
 
 // NewClient method initializes a new Radarr client.
-func NewClient(hostname, apiKey string, interval time.Duration) *Client {
+func NewClient(hostname, apiKey string, interval time.Duration, authType string) *Client {
 	return &Client{
 		hostname: hostname,
 		apiKey:   apiKey,
 		interval: interval,
+		authType: authType,
 		httpClient: http.Client{
 			CheckRedirect: func(req *http.Request, via []*http.Request) error {
 				return http.ErrUseLastResponse
@@ -139,7 +142,12 @@ func (c *Client) apiRequest(endpoint string, target interface{}) error {
 	log.Printf("Sending HTTP request to %s", endpoint)
 
 	req, err := http.NewRequest("GET", endpoint, nil)
-	req.Header.Add("X-Api-Key", c.apiKey)
+	if c.authType == "basic" {
+		req.Header.Add("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(c.apiKey)))
+	} else {
+		req.Header.Add("X-Api-Key", c.apiKey)
+	}
+
 	if err != nil {
 		log.Fatal("An error has occurred when creating HTTP request", err)
 		return err
