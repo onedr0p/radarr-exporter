@@ -149,6 +149,8 @@ func (c *Client) apiRequest(endpoint string, target interface{}) error {
 	if err != nil {
 		log.Fatal("An error has occurred during retrieving Radarr statistics", err)
 		return err
+	} else if resp.StatusCode != 200 {
+		fmt.Printf("Error: %v", err)
 	}
 	data, _ := ioutil.ReadAll(resp.Body)
 	if err := json.Unmarshal(data, target); err != nil {
