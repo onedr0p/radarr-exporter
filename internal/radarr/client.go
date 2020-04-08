@@ -14,20 +14,22 @@ import (
 
 // Client struct is a Radarr client to request an instance of a Radarr
 type Client struct {
-	httpClient http.Client
-	interval   time.Duration
-	hostname   string
-	apiKey     string
-	authType   string
+	httpClient     http.Client
+	interval       time.Duration
+	hostname       string
+	apiKey         string
+	basicAuth      bool
+	basicAuthCreds string
 }
 
 // NewClient method initializes a new Radarr client.
-func NewClient(hostname, apiKey string, interval time.Duration, authType string) *Client {
+func NewClient(hostname, apiKey string, interval time.Duration, basicAuth bool, basicAuthCreds string) *Client {
 	return &Client{
-		hostname: hostname,
-		apiKey:   apiKey,
-		interval: interval,
-		authType: authType,
+		hostname:       hostname,
+		apiKey:         apiKey,
+		interval:       interval,
+		basicAuth:      basicAuth,
+		basicAuthCreds: basicAuthCreds,
 		httpClient: http.Client{
 			CheckRedirect: func(req *http.Request, via []*http.Request) error {
 				return http.ErrUseLastResponse
@@ -142,11 +144,10 @@ func (c *Client) apiRequest(endpoint string, target interface{}) error {
 	log.Printf("Sending HTTP request to %s", endpoint)
 
 	req, err := http.NewRequest("GET", endpoint, nil)
-	if c.authType == "basic" {
-		req.Header.Add("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(c.apiKey)))
-	} else {
-		req.Header.Add("X-Api-Key", c.apiKey)
+	if c.basicAuth && c.basicAuthCreds != "" {
+		req.Header.Add("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(c.basicAuthCreds)))
 	}
+	req.Header.Add("X-Api-Key", c.apiKey)
 
 	if err != nil {
 		log.Fatal("An error has occurred when creating HTTP request", err)

@@ -15,21 +15,24 @@ import (
 
 // Config is the exporter CLI configuration.
 type Config struct {
-	Hostname     string        `config:"radarr_hostname"`
-	ApiKey       string        `config:"radarr_apikey"`
-	Port         string        `config:"port"`
-	AuthType     string        `config:"auth_type"`
-	Interval     time.Duration `config:"interval"`
-	StartupDelay time.Duration `config:"startup_delay"`
+	Hostname       string        `config:"radarr_hostname"`
+	ApiKey         string        `config:"radarr_apikey"`
+	Port           string        `config:"port"`
+	BasicAuth      bool          `config:"basic_auth"`
+	BasicAuthCreds string        `config:"basic_auth_creds"`
+	Interval       time.Duration `config:"interval"`
+	StartupDelay   time.Duration `config:"startup_delay"`
 }
 
 func getDefaultConfig() *Config {
 	return &Config{
-		Hostname:     "http://127.0.0.1:7878",
-		ApiKey:       "",
-		Port:         "9811",
-		Interval:     10 * time.Minute,
-		StartupDelay: 0 * time.Second,
+		Hostname:       "http://127.0.0.1:7878",
+		ApiKey:         "",
+		Port:           "9811",
+		Interval:       10 * time.Minute,
+		StartupDelay:   0 * time.Second,
+		BasicAuth:      false,
+		BasicAuthCreds: "",
 	}
 }
 
