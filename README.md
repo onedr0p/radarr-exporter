@@ -2,7 +2,8 @@
 
 Prometheus Exporter for Radarr
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/onedr0p/radarr-exporter)](https://hub.docker.com/r/onedr0p/radarr-exporter) [![Go Report Card](https://goreportcard.com/badge/github.com/onedr0p/radarr-exporter)](https://goreportcard.com/report/github.com/onedr0p/radarr-exporter)
+[![Docker Pulls](https://img.shields.io/docker/pulls/onedr0p/radarr-exporter)](https://hub.docker.com/r/onedr0p/radarr-exporter)
+[![Go Report Card](https://goreportcard.com/badge/github.com/onedr0p/radarr-exporter)](https://goreportcard.com/report/github.com/onedr0p/radarr-exporter)
 
 ## Usage
 

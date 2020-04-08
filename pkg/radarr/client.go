@@ -3,6 +3,7 @@ package radarr
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
@@ -138,10 +139,9 @@ func (c *Client) apiRequest(endpoint string, target interface{}) error {
 	log.Printf("Sending HTTP request to %s", endpoint)
 
 	req, err := http.NewRequest("GET", endpoint, nil)
-	req.Header.Set("X-Api-Key", c.apiKey)
-	// req.Header.Add("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte("")))
+	req.Header.Add("X-Api-Key", c.apiKey)
 	if err != nil {
-		log.Fatal("An error has occurred when creating HTTP statistics request", err)
+		log.Fatal("An error has occurred when creating HTTP request", err)
 		return err
 	}
 
@@ -150,7 +150,9 @@ func (c *Client) apiRequest(endpoint string, target interface{}) error {
 		log.Fatal("An error has occurred during retrieving Radarr statistics", err)
 		return err
 	}
-
-	defer resp.Body.Close()
-	return json.NewDecoder(resp.Body).Decode(target)
+	data, _ := ioutil.ReadAll(resp.Body)
+	if err := json.Unmarshal(data, target); err != nil {
+		return err
+	}
+	return err
 }
