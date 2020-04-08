@@ -38,7 +38,7 @@ func NewClient(hostname, apiKey string, interval time.Duration, basicAuth bool, 
 	}
 }
 
-// Scrape method logs in and retrieves statistics from Radarr JSON API
+// scrape function logs in and retrieves statistics from Radarr JSON API
 // and then pass them as Prometheus metrics.
 func scrape(c *Client) {
 	// System Status
@@ -132,6 +132,7 @@ func scrape(c *Client) {
 	}
 }
 
+// Scrape method iterates scrape function
 func (c *Client) Scrape() {
 	scrape(c)
 	for range time.Tick(c.interval) {

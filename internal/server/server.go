@@ -50,19 +50,19 @@ func (s *Server) Stop() {
 }
 
 func (s *Server) readinessHandler() http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
 		if s.isReady() {
 			w.WriteHeader(http.StatusOK)
 		} else {
 			w.WriteHeader(http.StatusNotFound)
 		}
-	})
+	}
 }
 
 func (s *Server) livenessHandler() http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusOK)
-	})
+	}
 }
 
 func (s *Server) isReady() bool {
