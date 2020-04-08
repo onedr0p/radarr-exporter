@@ -7,10 +7,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/onedr0p/radarr-exporter/pkg/config"
-	"github.com/onedr0p/radarr-exporter/pkg/metrics"
-	"github.com/onedr0p/radarr-exporter/pkg/radarr"
-	"github.com/onedr0p/radarr-exporter/pkg/server"
+	"github.com/onedr0p/radarr-exporter/internal/config"
+	"github.com/onedr0p/radarr-exporter/internal/metrics"
+	"github.com/onedr0p/radarr-exporter/internal/radarr"
+	"github.com/onedr0p/radarr-exporter/internal/server"
 )
 
 const (

@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/onedr0p/radarr-exporter/pkg/metrics"
+	"github.com/onedr0p/radarr-exporter/internal/metrics"
 )
 
 // Client struct is a Radarr client to request an instance of a Radarr
