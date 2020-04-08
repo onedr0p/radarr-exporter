@@ -24,7 +24,7 @@ type Config struct {
 
 func getDefaultConfig() *Config {
 	return &Config{
-		Hostname:     "127.0.0.1",
+		Hostname:     "http://127.0.0.1:7878",
 		ApiKey:       "",
 		Port:         "9811",
 		Interval:     10 * time.Minute,
