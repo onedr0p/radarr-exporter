@@ -9,7 +9,7 @@ COPY . .
 
 RUN export GOOS=${TARGETPLATFORM%%/*} && \
     export GOARCH=$(echo ${TARGETPLATFORM} | cut -d/ -f2) && \
-    export GOARM=${TARGETPLATFORM##*/} &&
+    export GOARM=${TARGETPLATFORM##*/} && \
     apk --no-cache add ca-certificates && \
     go mod download && \
     go build -a -tags netgo -ldflags '-w -extldflags "-static"' /build/cmd/radarr-exporter/.
