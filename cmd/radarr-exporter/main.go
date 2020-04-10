@@ -2,57 +2,109 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
-	"os/signal"
-	"syscall"
+	"sync/atomic"
 	"time"
 
+	"github.com/onedr0p/radarr-exporter/internal/collector"
 	"github.com/onedr0p/radarr-exporter/internal/config"
-	"github.com/onedr0p/radarr-exporter/internal/metrics"
-	"github.com/onedr0p/radarr-exporter/internal/radarr"
-	"github.com/onedr0p/radarr-exporter/internal/server"
+	"github.com/onedr0p/radarr-exporter/internal/handlers"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	log "github.com/sirupsen/logrus"
 )
 
-const (
-	name = "radarr-exporter"
-)
+func init() {
+	conf := config.New()
+	switch conf.LogLevel {
+	case "TRACE":
+		log.SetLevel(log.TraceLevel)
+	case "DEBUG":
+		log.SetLevel(log.DebugLevel)
+	case "INFO":
+		log.SetLevel(log.InfoLevel)
+	case "WARN":
+		log.SetLevel(log.WarnLevel)
+	default:
+		log.SetLevel(log.InfoLevel)
+	}
+	log.SetFormatter(&log.TextFormatter{})
+	log.SetOutput(os.Stdout)
 
-var (
-	s *server.Server
-)
+	log.Info(`                                       
+    ........
+  .............
+  .... ............
+  ....     ...........
+  ....   XX    ...........
+  ....   XXXXXX   ...........
+  ....   XXXXXXXXX    ........
+  ....   XXXXXXXXXXXXX   ......
+  ....   XXXXXXXXXXXX     .....
+  ....   XXXXXXXXX    ........
+  ....   XXXXX     .........
+  ....   XX    ...........
+  ....      ...........
+  ....   ..........
+    ............
+     .........
+`)
+
+	log.Infof(`Radarr exporter started...
+Hostname: %s
+API Key: %s
+Port: %d
+Basic Auth Enabled: %v
+Basic Auth Crendentials: %s`,
+		conf.Hostname,
+		conf.ApiKey,
+		conf.Port,
+		conf.BasicAuth,
+		conf.BasicAuthCreds,
+	)
+
+}
 
 func main() {
-	conf := config.Load()
+	conf := config.New()
 
-	if conf.StartupDelay.Seconds() > 0.0 {
-		fmt.Printf(fmt.Sprintf("Startup delay configured... sleeping for %v seconds", conf.StartupDelay.Seconds()))
-		time.Sleep(conf.StartupDelay)
+	isReady := &atomic.Value{}
+	isReady.Store(false)
+	go func() {
+		log.Debugf("Readiness probe is negative by default...")
+		time.Sleep(10 * time.Second)
+		isReady.Store(true)
+		log.Debugf("Readiness probe is positive.")
+	}()
+
+	r := prometheus.NewRegistry()
+	r.MustRegister(
+		collector.NewMovieCollector(),
+		collector.NewQueueCollector(),
+		collector.NewHistoryCollector(),
+		collector.NewRootFolderCollector(),
+		collector.NewSystemStatusCollector(),
+		collector.NewSystemHealthCollector(),
+	)
+
+	handler := promhttp.HandlerFor(r, promhttp.HandlerOpts{})
+	http.HandleFunc("/", handlers.IndexHandler)
+	http.HandleFunc("/liveness", handlers.LivenessHandler)
+	http.HandleFunc("/readiness", handlers.ReadinessHandler(isReady))
+	http.Handle("/metrics", handler)
+
+	log.Infof("Listening on localhost:%d", conf.Port)
+	err := http.ListenAndServe(fmt.Sprintf(":%d", conf.Port), logRequest(http.DefaultServeMux))
+	if err != nil {
+		log.Fatal(err)
 	}
-
-	metrics.Init()
-
-	initRadarrClient(conf.Hostname, conf.ApiKey, conf.Interval, conf.BasicAuth, conf.BasicAuthCreds)
-	initHttpServer(conf.Port)
-
-	handleExitSignal()
 }
 
-func initRadarrClient(hostname, apiKey string, interval time.Duration, basicAuth bool, basicAuthCreds string) {
-	client := radarr.NewClient(hostname, apiKey, interval, basicAuth, basicAuthCreds)
-	go client.Scrape()
-}
-
-func initHttpServer(port string) {
-	s = server.NewServer(port)
-	go s.ListenAndServe()
-}
-
-func handleExitSignal() {
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
-
-	<-stop
-
-	s.Stop()
-	fmt.Println(fmt.Sprintf("\n%s HTTP server stopped", name))
+func logRequest(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Debugf("%s %s %s\n", r.RemoteAddr, r.Method, r.URL)
+		handler.ServeHTTP(w, r)
+	})
 }
