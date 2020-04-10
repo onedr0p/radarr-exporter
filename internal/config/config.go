@@ -1,71 +1,53 @@
 package config
 
 import (
-	"context"
-	"fmt"
-	"log"
-	"reflect"
-	"time"
-
-	"github.com/heetch/confita"
-	"github.com/heetch/confita/backend"
-	"github.com/heetch/confita/backend/env"
-	"github.com/heetch/confita/backend/flags"
+	"os"
+	"strconv"
+	"strings"
 )
 
-// Config is the exporter CLI configuration.
 type Config struct {
-	Hostname       string        `config:"radarr_hostname"`
-	ApiKey         string        `config:"radarr_apikey"`
-	Port           string        `config:"port"`
-	BasicAuth      bool          `config:"basic_auth"`
-	BasicAuthCreds string        `config:"basic_auth_creds"`
-	Interval       time.Duration `config:"interval"`
-	StartupDelay   time.Duration `config:"startup_delay"`
+	Hostname       string
+	ApiKey         string
+	BasicAuth      bool
+	BasicAuthCreds string
+	Port           int
+	LogLevel       string
 }
 
-func getDefaultConfig() *Config {
+func New() *Config {
 	return &Config{
-		Hostname:       "http://127.0.0.1:7878",
-		ApiKey:         "",
-		Port:           "9811",
-		Interval:       10 * time.Minute,
-		StartupDelay:   0 * time.Second,
-		BasicAuth:      false,
-		BasicAuthCreds: "",
+		Hostname:       getEnvStr("RADARR_HOSTNAME", "127.0.0.1"),
+		ApiKey:         getEnvStr("RADARR_APIKEY", ""),
+		BasicAuth:      getEnvBool("BASIC_AUTH", false),
+		BasicAuthCreds: getEnvStr("BASIC_AUTH_CREDS", ""),
+		Port:           getEnvInt("PORT", 9811),
+		LogLevel:       strings.ToUpper(getEnvStr("LOG_LEVEL", "INFO")),
 	}
 }
 
-// Load method loads the configuration by using both flag or environment variables.
-func Load() *Config {
-	loaders := []backend.Backend{
-		env.NewBackend(),
-		flags.NewBackend(),
+func getEnvStr(key string, defaultVal string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
 	}
 
-	loader := confita.NewLoader(loaders...)
-
-	cfg := getDefaultConfig()
-	err := loader.Load(context.Background(), cfg)
-	if err != nil {
-		panic(err)
-	}
-
-	cfg.show()
-
-	return cfg
+	return defaultVal
 }
 
-func (c Config) show() {
-	val := reflect.ValueOf(&c).Elem()
-	log.Println("-------------------------------------")
-	log.Println("-   Radarr exporter configuration   -")
-	log.Println("-------------------------------------")
-	for i := 0; i < val.NumField(); i++ {
-		valueField := val.Field(i)
-		typeField := val.Type().Field(i)
-
-		log.Println(fmt.Sprintf("%s : %v", typeField.Name, valueField.Interface()))
+func getEnvInt(name string, defaultVal int) int {
+	valueStr := getEnvStr(name, "")
+	if value, err := strconv.Atoi(valueStr); err == nil {
+		return value
 	}
-	log.Println("------------------------------------")
+
+	return defaultVal
+}
+
+func getEnvBool(name string, defaultVal bool) bool {
+	valStr := getEnvStr(name, "")
+	if val, err := strconv.ParseBool(valStr); err == nil {
+		return val
+	}
+
+	return defaultVal
 }
