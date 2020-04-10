@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/onedr0p/radarr-exporter/internal/config"
@@ -60,9 +59,6 @@ func (c *Client) DoRequest(endpoint string, target interface{}) error {
 		log.Fatal(errMsg)
 		return errors.New(errMsg)
 	}
-	data, _ := ioutil.ReadAll(resp.Body)
-	if err := json.Unmarshal(data, target); err != nil {
-		return err
-	}
-	return err
+	defer resp.Body.Close()
+	return json.NewDecoder(resp.Body).Decode(target)
 }
