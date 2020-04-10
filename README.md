@@ -2,17 +2,16 @@
 
 Prometheus Exporter for Radarr
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/onedr0p/radarr-exporter)](https://hub.docker.com/r/onedr0p/radarr-exporter) [![Go Report Card](https://goreportcard.com/badge/github.com/onedr0p/radarr-exporter)](https://goreportcard.com/report/github.com/onedr0p/radarr-exporter)
+[![Docker Pulls](https://img.shields.io/docker/pulls/onedr0p/radarr-exporter)](https://hub.docker.com/r/onedr0p/radarr-exporter)
+[![Go Report Card](https://goreportcard.com/badge/github.com/onedr0p/radarr-exporter)](https://goreportcard.com/report/github.com/onedr0p/radarr-exporter)
 
 ## Usage
 
-|Name             |Description                                                  |Default|
-|-----------------|-------------------------------------------------------------|-------|
-|`RADARR_HOSTNAME`|Your Radarr instance's URL                                   |       |
-|`RADARR_APIKEY`  |Your Radarr instance's API Key                               |       |
-|`INTERVAL`       |The duration of which the exporter will call the Radarr API  |`10m`  |
-|`PORT`           |The port the exporter will listen on                         |`9811` |
-|`STARTUP_DELAY`  |The duration to wait before first calling the Radarr API     |       |
+|Name             |Description                                                  |Default                |
+|-----------------|-------------------------------------------------------------|-----------------------|
+|`RADARR_HOSTNAME`|Your Radarr instance's URL                                   |`http://127.0.0.1:7878`|
+|`RADARR_APIKEY`  |Your Radarr instance's API Key                               |                       |
+|`PORT`           |The port the exporter will listen on                         |`9707`                 |
 
 ### Docker Compose Example
 
@@ -24,7 +23,6 @@ services:
     environment:
       RADARR_HOSTNAME: "http://localhost:7878"
       RADARR_APIKEY: "..."
-      INTERVAL: "1h"
 ```
 
 ### Metrics

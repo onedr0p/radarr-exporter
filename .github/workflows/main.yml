@@ -28,5 +28,5 @@ jobs:
           docker buildx build \
             -t onedr0p/radarr-exporter:${GITHUB_REF##*/} \
             --platform linux/amd64,linux/arm/v7,linux/arm64 \
-            -f Dockerfile \
+            -f ./build/package/Dockerfile \
             --push .
