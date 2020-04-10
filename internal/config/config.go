@@ -21,7 +21,7 @@ func New() *Config {
 		ApiKey:         GetEnvStr("RADARR_APIKEY", ""),
 		BasicAuth:      GetEnvBool("BASIC_AUTH", false),
 		BasicAuthCreds: GetEnvStr("BASIC_AUTH_CREDS", ""),
-		Port:           GetEnvInt("PORT", 9811),
+		Port:           GetEnvInt("PORT", 9707),
 		LogLevel:       strings.ToUpper(GetEnvStr("LOG_LEVEL", "INFO")),
 	}
 }
