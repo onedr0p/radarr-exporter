@@ -4,19 +4,22 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"sync/atomic"
 	"time"
 
 	"github.com/onedr0p/radarr-exporter/internal/collector"
 	"github.com/onedr0p/radarr-exporter/internal/config"
+	"github.com/onedr0p/radarr-exporter/internal/handlers"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
 )
 
-func main() {
-	conf := config.New()
-	switch conf.LogLevel {
+func init() {
+	logLevel := strings.ToUpper(config.GetEnvStr("LOG_LEVEL", "TRACE"))
+	switch logLevel {
 	case "TRACE":
 		log.SetLevel(log.TraceLevel)
 	case "DEBUG":
@@ -26,10 +29,14 @@ func main() {
 	case "WARN":
 		log.SetLevel(log.WarnLevel)
 	default:
-		log.SetLevel(log.DebugLevel)
+		log.SetLevel(log.InfoLevel)
 	}
 	log.SetFormatter(&log.TextFormatter{})
 	log.SetOutput(os.Stdout)
+}
+
+func main() {
+	conf := config.New()
 
 	isReady := &atomic.Value{}
 	isReady.Store(false)
@@ -51,39 +58,16 @@ func main() {
 	)
 
 	handler := promhttp.HandlerFor(r, promhttp.HandlerOpts{})
-	http.HandleFunc("/", indexHandler)
-	http.HandleFunc("/liveness", livenessHandler)
-	http.HandleFunc("/readiness", readinessHandler(isReady))
+	http.HandleFunc("/", handlers.IndexHandler)
+	http.HandleFunc("/liveness", handlers.LivenessHandler)
+	http.HandleFunc("/readiness", handlers.ReadinessHandler(isReady))
 	http.Handle("/metrics", handler)
 
-	log.Debug(fmt.Sprintf("Listening on localhost:%d", conf.Port))
+	log.Debugf("Listening on localhost:%d", conf.Port)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", conf.Port), logRequest(http.DefaultServeMux))
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func indexHandler(w http.ResponseWriter, _ *http.Request) {
-	response := `<h1>Radarr Exporter</h1><p><a href='/metrics'>metrics</a></p>`
-	fmt.Fprintf(w, response)
-}
-
-func readinessHandler(isReady *atomic.Value) http.HandlerFunc {
-	return func(w http.ResponseWriter, _ *http.Request) {
-		if isReady == nil || !isReady.Load().(bool) {
-			http.Error(w, http.StatusText(http.StatusServiceUnavailable), http.StatusServiceUnavailable)
-			return
-		}
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
-		fmt.Fprint(w)
-	}
-}
-
-func livenessHandler(w http.ResponseWriter, _ *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("OK"))
-	fmt.Fprint(w)
 }
 
 func logRequest(handler http.Handler) http.Handler {

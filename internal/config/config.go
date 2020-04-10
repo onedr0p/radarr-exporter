@@ -3,7 +3,6 @@ package config
 import (
 	"os"
 	"strconv"
-	"strings"
 )
 
 type Config struct {
@@ -12,21 +11,20 @@ type Config struct {
 	BasicAuth      bool
 	BasicAuthCreds string
 	Port           int
-	LogLevel       string
 }
 
 func New() *Config {
 	return &Config{
-		Hostname:       getEnvStr("RADARR_HOSTNAME", "127.0.0.1"),
-		ApiKey:         getEnvStr("RADARR_APIKEY", ""),
-		BasicAuth:      getEnvBool("BASIC_AUTH", false),
-		BasicAuthCreds: getEnvStr("BASIC_AUTH_CREDS", ""),
-		Port:           getEnvInt("PORT", 9811),
-		LogLevel:       strings.ToUpper(getEnvStr("LOG_LEVEL", "INFO")),
+		Hostname:       GetEnvStr("RADARR_HOSTNAME", "127.0.0.1"),
+		ApiKey:         GetEnvStr("RADARR_APIKEY", ""),
+		BasicAuth:      GetEnvBool("BASIC_AUTH", false),
+		BasicAuthCreds: GetEnvStr("BASIC_AUTH_CREDS", ""),
+		Port:           GetEnvInt("PORT", 9811),
 	}
 }
 
-func getEnvStr(key string, defaultVal string) string {
+// GetEnvStr -
+func GetEnvStr(key string, defaultVal string) string {
 	if value, exists := os.LookupEnv(key); exists {
 		return value
 	}
@@ -34,8 +32,9 @@ func getEnvStr(key string, defaultVal string) string {
 	return defaultVal
 }
 
-func getEnvInt(name string, defaultVal int) int {
-	valueStr := getEnvStr(name, "")
+// GetEnvInt -
+func GetEnvInt(name string, defaultVal int) int {
+	valueStr := GetEnvStr(name, "")
 	if value, err := strconv.Atoi(valueStr); err == nil {
 		return value
 	}
@@ -43,8 +42,9 @@ func getEnvInt(name string, defaultVal int) int {
 	return defaultVal
 }
 
-func getEnvBool(name string, defaultVal bool) bool {
-	valStr := getEnvStr(name, "")
+// GetEnvBool -
+func GetEnvBool(name string, defaultVal bool) bool {
+	valStr := GetEnvStr(name, "")
 	if val, err := strconv.ParseBool(valStr); err == nil {
 		return val
 	}
