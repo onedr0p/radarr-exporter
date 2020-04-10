@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"strconv"
+	"strings"
 )
 
 type Config struct {
@@ -11,6 +12,7 @@ type Config struct {
 	BasicAuth      bool
 	BasicAuthCreds string
 	Port           int
+	LogLevel       string
 }
 
 func New() *Config {
@@ -20,6 +22,7 @@ func New() *Config {
 		BasicAuth:      GetEnvBool("BASIC_AUTH", false),
 		BasicAuthCreds: GetEnvStr("BASIC_AUTH_CREDS", ""),
 		Port:           GetEnvInt("PORT", 9811),
+		LogLevel:       strings.ToUpper(GetEnvStr("LOG_LEVEL", "INFO")),
 	}
 }
 

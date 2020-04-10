@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strings"
 	"sync/atomic"
 	"time"
 
@@ -18,8 +17,8 @@ import (
 )
 
 func init() {
-	logLevel := strings.ToUpper(config.GetEnvStr("LOG_LEVEL", "TRACE"))
-	switch logLevel {
+	conf := config.New()
+	switch conf.LogLevel {
 	case "TRACE":
 		log.SetLevel(log.TraceLevel)
 	case "DEBUG":
@@ -33,6 +32,39 @@ func init() {
 	}
 	log.SetFormatter(&log.TextFormatter{})
 	log.SetOutput(os.Stdout)
+
+	log.Info(`                                       
+    ........
+  .............
+  .... ............
+  ....     ...........
+  ....   XX    ...........
+  ....   XXXXXX   ...........
+  ....   XXXXXXXXX    ........
+  ....   XXXXXXXXXXXXX   ......
+  ....   XXXXXXXXXXXX     .....
+  ....   XXXXXXXXX    ........
+  ....   XXXXX     .........
+  ....   XX    ...........
+  ....      ...........
+  ....   ..........
+    ............
+     .........
+`)
+
+	log.Infof(`Radarr exporter started...
+Hostname: %s
+API Key: %s
+Port: %d
+Basic Auth Enabled: %v
+Basic Auth Crendentials: %s`,
+		conf.Hostname,
+		conf.ApiKey,
+		conf.Port,
+		conf.BasicAuth,
+		conf.BasicAuthCreds,
+	)
+
 }
 
 func main() {
@@ -63,7 +95,7 @@ func main() {
 	http.HandleFunc("/readiness", handlers.ReadinessHandler(isReady))
 	http.Handle("/metrics", handler)
 
-	log.Debugf("Listening on localhost:%d", conf.Port)
+	log.Infof("Listening on localhost:%d", conf.Port)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", conf.Port), logRequest(http.DefaultServeMux))
 	if err != nil {
 		log.Fatal(err)

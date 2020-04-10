@@ -37,7 +37,7 @@ func NewClient(conf *config.Config) *Client {
 
 // DoRequest - Take a HTTP Request and return Unmarshaled data
 func (c *Client) DoRequest(endpoint string, target interface{}) error {
-	log.Printf("Sending HTTP request to %s", endpoint)
+	log.Infof("Sending HTTP request to %s", endpoint)
 
 	req, err := http.NewRequest("GET", endpoint, nil)
 	if c.basicAuth && c.basicAuthCreds != "" {
