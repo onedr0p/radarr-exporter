@@ -13,7 +13,8 @@ Prometheus Exporter for Radarr
 |`RADARR_APIKEY`             |Your Radarr API Key                                          |                       |
 |`RADARR_BASIC_AUTH_ENABLED` |Set to `true` to enable Basic Auth                           |`false`                |
 |`RADARR_BASIC_AUTH_USERNAME`|Set to your username if enabled Basic Auth                   |                       |
-|`RADARR_BASIC_AUTH_PASSWORD`|Set to password if enabled Basic Auth                        |                       |
+|`RADARR_BASIC_AUTH_PASSWORD`|Set to your password if enabled Basic Auth                   |                       |
+|`DISABLE_SSL_VERIFY`        |Set to `true` to disable SSL verification (use with caution) |`false`                |
 |`LISTEN_PORT`               |The port the exporter will listen on                         |`9707`                 |
 |`LISTEN_IP`                 |The IP the exporter will listen on                           |`0.0.0.0`              |
 |`LOG_LEVEL`                 |Set the default Log Level                                    |`INFO`                 |
@@ -50,9 +51,10 @@ OPTIONS:
    --listen-port value          Port the exporter will listen on (default: 9707) [$LISTEN_PORT]
    --listen-ip value            IP the exporter will listen on (default: "0.0.0.0") [$LISTEN_IP]
    --log-level value            Set the default Log Level (default: "INFO") [$LOG_LEVEL]
-   --url value                  Full URL to Radarr (default: "http://127.0.0.1:7878") [$RADARR_URL]
+   --disable-ssl-verify         Disable SSL Verifications (default: false) [$DISABLE_SSL_VERIFY]
+   --url value                  Full URL to Radarr (default: "http://localhost:7878") [$RADARR_URL]
    --api-key value              Radarr's API Key (default: "") [$RADARR_APIKEY]
-   --basic-auth-enabled         Enable Basic Auth (default: true) [$RADARR_BASIC_AUTH_ENABLED]
+   --basic-auth-enabled         Enable Basic Auth (default: false) [$RADARR_BASIC_AUTH_ENABLED]
    --basic-auth-username value  If Basic Auth is enabled, provide the username (default: "") [$RADARR_BASIC_AUTH_USERNAME]
    --basic-auth-password value  If Basic Auth is enabled, provide the password (default: "") [$RADARR_BASIC_AUTH_PASSWORD]
    --help, -h                   show help (default: false)

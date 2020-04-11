@@ -1,6 +1,7 @@
 package radarr
 
 import (
+	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -13,22 +14,14 @@ import (
 
 // Client struct is a Radarr client to request an instance of a Radarr
 type Client struct {
-	url          string
-	apikey       string
-	authEnabled  bool
-	authUsername string
-	authPassword string
-	httpClient   http.Client
+	config     *cli.Context
+	httpClient http.Client
 }
 
 // NewClient method initializes a new Radarr client.
 func NewClient(c *cli.Context) *Client {
 	return &Client{
-		url:          c.String("url"),
-		apikey:       c.String("api-key"),
-		authEnabled:  c.Bool("basic-auth-enabled"),
-		authUsername: c.String("basic-auth-username"),
-		authPassword: c.String("basic-auth-password"),
+		config: c,
 		httpClient: http.Client{
 			CheckRedirect: func(req *http.Request, via []*http.Request) error {
 				return http.ErrUseLastResponse
@@ -39,13 +32,16 @@ func NewClient(c *cli.Context) *Client {
 
 // DoRequest - Take a HTTP Request and return Unmarshaled data
 func (c *Client) DoRequest(endpoint string, target interface{}) error {
-	apiEndpoint := fmt.Sprintf("%s/api/v3/%s", c.url, endpoint)
+	apiEndpoint := fmt.Sprintf("%s/api/v3/%s", c.config.String("url"), endpoint)
+
 	log.Infof("Sending HTTP request to %s", apiEndpoint)
+
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: c.config.Bool("disable-ssl-verify")}
 	req, err := http.NewRequest("GET", apiEndpoint, nil)
-	if c.authEnabled && c.authUsername != "" && c.authPassword != "" {
-		req.Header.Add("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(c.authUsername+":"+c.authPassword)))
+	if c.config.Bool("basic-auth-enabled") && c.config.String("basic-auth-username") != "" && c.config.String("basic-auth-password") != "" {
+		req.Header.Add("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(c.config.String("basic-auth-username")+":"+c.config.String("basic-auth-password"))))
 	}
-	req.Header.Add("X-Api-Key", c.apikey)
+	req.Header.Add("X-Api-Key", c.config.String("api-key"))
 
 	if err != nil {
 		log.Fatalf("An error has occurred when creating HTTP request %v", err)

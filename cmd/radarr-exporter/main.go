@@ -57,6 +57,13 @@ func main() {
 					Required: false,
 					EnvVars:  []string{"LOG_LEVEL"},
 				},
+				&cli.BoolFlag{
+					Name:     "disable-ssl-verify",
+					Usage:    "Disable SSL Verifications",
+					Value:    false,
+					Required: false,
+					EnvVars:  []string{"DISABLE_SSL_VERIFY"},
+				},
 				&cli.StringFlag{
 					Name:     "url",
 					Value:    "http://127.0.0.1:7878",
