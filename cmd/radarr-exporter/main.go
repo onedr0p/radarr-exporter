@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"sync/atomic"
-	"time"
 
 	"github.com/onedr0p/radarr-exporter/internal/collector"
 	"github.com/onedr0p/radarr-exporter/internal/config"
@@ -70,15 +68,6 @@ Basic Auth Crendentials: %s`,
 func main() {
 	conf := config.New()
 
-	isReady := &atomic.Value{}
-	isReady.Store(false)
-	go func() {
-		log.Debugf("Readiness probe is negative by default...")
-		time.Sleep(10 * time.Second)
-		isReady.Store(true)
-		log.Debugf("Readiness probe is positive.")
-	}()
-
 	r := prometheus.NewRegistry()
 	r.MustRegister(
 		collector.NewMovieCollector(),
@@ -91,8 +80,7 @@ func main() {
 
 	handler := promhttp.HandlerFor(r, promhttp.HandlerOpts{})
 	http.HandleFunc("/", handlers.IndexHandler)
-	http.HandleFunc("/liveness", handlers.LivenessHandler)
-	http.HandleFunc("/readiness", handlers.ReadinessHandler(isReady))
+	http.HandleFunc("/healthz", handlers.HealthzHandler)
 	http.Handle("/metrics", handler)
 
 	log.Infof("Listening on localhost:%d", conf.Port)
