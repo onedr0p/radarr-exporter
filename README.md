@@ -7,11 +7,15 @@ Prometheus Exporter for Radarr
 
 ## Usage
 
-|Name             |Description                                                  |Default                |
-|-----------------|-------------------------------------------------------------|-----------------------|
-|`RADARR_HOSTNAME`|Your Radarr instance's URL                                   |`http://127.0.0.1:7878`|
-|`RADARR_APIKEY`  |Your Radarr instance's API Key                               |                       |
-|`PORT`           |The port the exporter will listen on                         |`9707`                 |
+|Name              |Description                                                  |Default                |
+|------------------|-------------------------------------------------------------|-----------------------|
+|`RADARR_HOSTNAME` |Your Radarr instance's URL                                   |`http://127.0.0.1:7878`|
+|`RADARR_APIKEY`   |Your Radarr instance's API Key                               |                       |
+|`PORT`            |The port the exporter will listen on                         |`9707`                 |
+|`BASIC_AUTH`      |Set to `true` to enable Basic Auth                           |`false`                |
+|`BASIC_AUTH_CREDS`|Set to `username:password` if enabled Basic Auth             |                       |
+|`LOG_LEVEL`       |Set the default Log Level                                    |`INFO`                 |
+
 
 ### Docker Compose Example
 
