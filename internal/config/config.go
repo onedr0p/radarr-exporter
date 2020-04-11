@@ -17,7 +17,7 @@ type Config struct {
 
 func New() *Config {
 	return &Config{
-		Hostname:       GetEnvStr("RADARR_HOSTNAME", "127.0.0.1"),
+		Hostname:       GetEnvStr("RADARR_HOSTNAME", "http://127.0.0.1:7878"),
 		ApiKey:         GetEnvStr("RADARR_APIKEY", ""),
 		BasicAuth:      GetEnvBool("BASIC_AUTH", false),
 		BasicAuthCreds: GetEnvStr("BASIC_AUTH_CREDS", ""),
