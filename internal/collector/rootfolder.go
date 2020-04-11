@@ -1,22 +1,25 @@
 package collector
 
 import (
-	"fmt"
-
-	"github.com/onedr0p/radarr-exporter/internal/config"
 	"github.com/onedr0p/radarr-exporter/internal/radarr"
 	"github.com/prometheus/client_golang/prometheus"
+	log "github.com/sirupsen/logrus"
+	"github.com/urfave/cli/v2"
 )
 
 type rootFolderCollector struct {
+	config           *cli.Context
 	rootFolderMetric *prometheus.Desc
 }
 
-func NewRootFolderCollector() *rootFolderCollector {
+func NewRootFolderCollector(c *cli.Context) *rootFolderCollector {
 	return &rootFolderCollector{
-		rootFolderMetric: prometheus.NewDesc("radarr_rootfolder_freespace_bytes",
+		config: c,
+		rootFolderMetric: prometheus.NewDesc(
+			"radarr_rootfolder_freespace_bytes",
 			"Root folder space in bytes",
-			[]string{"hostname", "path"}, nil,
+			[]string{"path"},
+			prometheus.Labels{"url": c.String("url")},
 		),
 	}
 }
@@ -26,16 +29,15 @@ func (collector *rootFolderCollector) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (collector *rootFolderCollector) Collect(ch chan<- prometheus.Metric) {
-	conf := config.New()
-	client := radarr.NewClient(conf)
-
+	client := radarr.NewClient(collector.config)
 	rootFolders := radarr.RootFolder{}
-	client.DoRequest(fmt.Sprintf("%s/api/v3/%s", conf.Hostname, "rootfolder"), &rootFolders)
-
+	if err := client.DoRequest("rootfolder", &rootFolders); err != nil {
+		log.Fatal(err)
+	}
 	// Group metrics by path
 	for _, rootFolder := range rootFolders {
 		ch <- prometheus.MustNewConstMetric(collector.rootFolderMetric, prometheus.GaugeValue, float64(rootFolder.FreeSpace),
-			conf.Hostname, rootFolder.Path,
+			rootFolder.Path,
 		)
 	}
 }

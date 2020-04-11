@@ -4,28 +4,31 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 
-	"github.com/onedr0p/radarr-exporter/internal/config"
 	log "github.com/sirupsen/logrus"
+	"github.com/urfave/cli/v2"
 )
 
 // Client struct is a Radarr client to request an instance of a Radarr
 type Client struct {
-	hostname       string
-	apiKey         string
-	basicAuth      bool
-	basicAuthCreds string
-	httpClient     http.Client
+	url          string
+	apikey       string
+	authEnabled  bool
+	authUsername string
+	authPassword string
+	httpClient   http.Client
 }
 
 // NewClient method initializes a new Radarr client.
-func NewClient(conf *config.Config) *Client {
+func NewClient(c *cli.Context) *Client {
 	return &Client{
-		hostname:       conf.Hostname,
-		apiKey:         conf.ApiKey,
-		basicAuth:      conf.BasicAuth,
-		basicAuthCreds: conf.BasicAuthCreds,
+		url:          c.String("url"),
+		apikey:       c.String("api-key"),
+		authEnabled:  c.Bool("basic-auth-enabled"),
+		authUsername: c.String("basic-auth-username"),
+		authPassword: c.String("basic-auth-password"),
 		httpClient: http.Client{
 			CheckRedirect: func(req *http.Request, via []*http.Request) error {
 				return http.ErrUseLastResponse
@@ -36,13 +39,13 @@ func NewClient(conf *config.Config) *Client {
 
 // DoRequest - Take a HTTP Request and return Unmarshaled data
 func (c *Client) DoRequest(endpoint string, target interface{}) error {
-	log.Infof("Sending HTTP request to %s", endpoint)
-
-	req, err := http.NewRequest("GET", endpoint, nil)
-	if c.basicAuth && c.basicAuthCreds != "" {
-		req.Header.Add("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(c.basicAuthCreds)))
+	apiEndpoint := fmt.Sprintf("%s/api/v3/%s", c.url, endpoint)
+	log.Infof("Sending HTTP request to %s", apiEndpoint)
+	req, err := http.NewRequest("GET", apiEndpoint, nil)
+	if c.authEnabled && c.authUsername != "" && c.authPassword != "" {
+		req.Header.Add("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(c.authUsername+":"+c.authPassword)))
 	}
-	req.Header.Add("X-Api-Key", c.apiKey)
+	req.Header.Add("X-Api-Key", c.apikey)
 
 	if err != nil {
 		log.Fatalf("An error has occurred when creating HTTP request %v", err)

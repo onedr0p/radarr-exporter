@@ -1,22 +1,25 @@
 package collector
 
 import (
-	"fmt"
-
-	"github.com/onedr0p/radarr-exporter/internal/config"
 	"github.com/onedr0p/radarr-exporter/internal/radarr"
 	"github.com/prometheus/client_golang/prometheus"
+	log "github.com/sirupsen/logrus"
+	"github.com/urfave/cli/v2"
 )
 
 type systemHealthCollector struct {
+	config             *cli.Context
 	systemHealthMetric *prometheus.Desc
 }
 
-func NewSystemHealthCollector() *systemHealthCollector {
+func NewSystemHealthCollector(c *cli.Context) *systemHealthCollector {
 	return &systemHealthCollector{
-		systemHealthMetric: prometheus.NewDesc("radarr_system_health_issues",
+		config: c,
+		systemHealthMetric: prometheus.NewDesc(
+			"radarr_system_health_issues",
 			"Total number of movies in the queue by status",
-			[]string{"hostname", "source", "type", "message", "wikiurl"}, nil,
+			[]string{"source", "type", "message", "wikiurl"},
+			prometheus.Labels{"url": c.String("url")},
 		),
 	}
 }
@@ -26,16 +29,15 @@ func (collector *systemHealthCollector) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (collector *systemHealthCollector) Collect(ch chan<- prometheus.Metric) {
-	conf := config.New()
-	client := radarr.NewClient(conf)
-
+	client := radarr.NewClient(collector.config)
 	systemHealth := radarr.SystemHealth{}
-	client.DoRequest(fmt.Sprintf("%s/api/v3/%s", conf.Hostname, "health"), &systemHealth)
-
+	if err := client.DoRequest("health", &systemHealth); err != nil {
+		log.Fatal(err)
+	}
 	// Group metrics by source, type, message and wikiurl
 	for _, s := range systemHealth {
 		ch <- prometheus.MustNewConstMetric(collector.systemHealthMetric, prometheus.GaugeValue, float64(1),
-			conf.Hostname, s.Source, s.Type, s.Message, s.WikiURL,
+			s.Source, s.Type, s.Message, s.WikiURL,
 		)
 	}
 }

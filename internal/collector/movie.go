@@ -1,14 +1,14 @@
 package collector
 
 import (
-	"fmt"
-
-	"github.com/onedr0p/radarr-exporter/internal/config"
 	"github.com/onedr0p/radarr-exporter/internal/radarr"
 	"github.com/prometheus/client_golang/prometheus"
+	log "github.com/sirupsen/logrus"
+	"github.com/urfave/cli/v2"
 )
 
 type movieCollector struct {
+	config            *cli.Context
 	movieMetric       *prometheus.Desc
 	downloadedMetric  *prometheus.Desc
 	monitoredMetric   *prometheus.Desc
@@ -19,39 +19,56 @@ type movieCollector struct {
 	qualitiesMetric   *prometheus.Desc
 }
 
-func NewMovieCollector() *movieCollector {
+func NewMovieCollector(c *cli.Context) *movieCollector {
 	return &movieCollector{
-		movieMetric: prometheus.NewDesc("radarr_movie_total",
+		config: c,
+		movieMetric: prometheus.NewDesc(
+			"radarr_movie_total",
 			"Total number of movies",
-			[]string{"hostname"}, nil,
+			nil,
+			prometheus.Labels{"url": c.String("url")},
 		),
-		downloadedMetric: prometheus.NewDesc("radarr_movie_download_total",
+		downloadedMetric: prometheus.NewDesc(
+			"radarr_movie_download_total",
 			"Total number of downloaded movies",
-			[]string{"hostname"}, nil,
+			nil,
+			prometheus.Labels{"url": c.String("url")},
 		),
-		monitoredMetric: prometheus.NewDesc("radarr_movie_monitored_total",
+		monitoredMetric: prometheus.NewDesc(
+			"radarr_movie_monitored_total",
 			"Total number of monitored movies",
-			[]string{"hostname"}, nil,
+			nil,
+			prometheus.Labels{"url": c.String("url")},
 		),
-		unmonitoredMetric: prometheus.NewDesc("radarr_movie_unmonitored_total",
+		unmonitoredMetric: prometheus.NewDesc(
+			"radarr_movie_unmonitored_total",
 			"Total number of unmonitored movies",
-			[]string{"hostname"}, nil,
+			nil,
+			prometheus.Labels{"url": c.String("url")},
 		),
-		wantedMetric: prometheus.NewDesc("radarr_movie_wanted_total",
+		wantedMetric: prometheus.NewDesc(
+			"radarr_movie_wanted_total",
 			"Total number of wanted movies",
-			[]string{"hostname"}, nil,
+			nil,
+			prometheus.Labels{"url": c.String("url")},
 		),
-		missingMetric: prometheus.NewDesc("radarr_movie_missing_total",
+		missingMetric: prometheus.NewDesc(
+			"radarr_movie_missing_total",
 			"Total number of missing movies",
-			[]string{"hostname"}, nil,
+			nil,
+			prometheus.Labels{"url": c.String("url")},
 		),
-		filesizeMetric: prometheus.NewDesc("radarr_movie_filesize_total",
+		filesizeMetric: prometheus.NewDesc(
+			"radarr_movie_filesize_total",
 			"Total filesize of all movies",
-			[]string{"hostname"}, nil,
+			nil,
+			prometheus.Labels{"url": c.String("url")},
 		),
-		qualitiesMetric: prometheus.NewDesc("radarr_movie_quality_total",
+		qualitiesMetric: prometheus.NewDesc(
+			"radarr_movie_quality_total",
 			"Total number of downloaded movies by quality",
-			[]string{"hostname", "quality"}, nil,
+			[]string{"quality"},
+			prometheus.Labels{"url": c.String("url")},
 		),
 	}
 }
@@ -68,9 +85,7 @@ func (collector *movieCollector) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (collector *movieCollector) Collect(ch chan<- prometheus.Metric) {
-	conf := config.New()
-	client := radarr.NewClient(conf)
-
+	client := radarr.NewClient(collector.config)
 	var fileSize int64
 	var (
 		downloaded  = 0
@@ -81,7 +96,9 @@ func (collector *movieCollector) Collect(ch chan<- prometheus.Metric) {
 		qualities   = map[string]int{}
 	)
 	movies := radarr.Movie{}
-	client.DoRequest(fmt.Sprintf("%s/api/v3/%s", conf.Hostname, "movie"), &movies)
+	if err := client.DoRequest("movie", &movies); err != nil {
+		log.Fatal(err)
+	}
 	for _, s := range movies {
 		if s.HasFile {
 			downloaded++
@@ -103,31 +120,16 @@ func (collector *movieCollector) Collect(ch chan<- prometheus.Metric) {
 			fileSize += s.MovieFile.Size
 		}
 	}
-
-	ch <- prometheus.MustNewConstMetric(collector.movieMetric, prometheus.GaugeValue, float64(len(movies)),
-		conf.Hostname,
-	)
-	ch <- prometheus.MustNewConstMetric(collector.downloadedMetric, prometheus.GaugeValue, float64(downloaded),
-		conf.Hostname,
-	)
-	ch <- prometheus.MustNewConstMetric(collector.monitoredMetric, prometheus.GaugeValue, float64(monitored),
-		conf.Hostname,
-	)
-	ch <- prometheus.MustNewConstMetric(collector.unmonitoredMetric, prometheus.GaugeValue, float64(unmonitored),
-		conf.Hostname,
-	)
-	ch <- prometheus.MustNewConstMetric(collector.wantedMetric, prometheus.GaugeValue, float64(wanted),
-		conf.Hostname,
-	)
-	ch <- prometheus.MustNewConstMetric(collector.missingMetric, prometheus.GaugeValue, float64(missing),
-		conf.Hostname,
-	)
-	ch <- prometheus.MustNewConstMetric(collector.filesizeMetric, prometheus.GaugeValue, float64(fileSize),
-		conf.Hostname,
-	)
+	ch <- prometheus.MustNewConstMetric(collector.movieMetric, prometheus.GaugeValue, float64(len(movies)))
+	ch <- prometheus.MustNewConstMetric(collector.downloadedMetric, prometheus.GaugeValue, float64(downloaded))
+	ch <- prometheus.MustNewConstMetric(collector.monitoredMetric, prometheus.GaugeValue, float64(monitored))
+	ch <- prometheus.MustNewConstMetric(collector.unmonitoredMetric, prometheus.GaugeValue, float64(unmonitored))
+	ch <- prometheus.MustNewConstMetric(collector.wantedMetric, prometheus.GaugeValue, float64(wanted))
+	ch <- prometheus.MustNewConstMetric(collector.missingMetric, prometheus.GaugeValue, float64(missing))
+	ch <- prometheus.MustNewConstMetric(collector.filesizeMetric, prometheus.GaugeValue, float64(fileSize))
 	for qualityName, count := range qualities {
 		ch <- prometheus.MustNewConstMetric(collector.qualitiesMetric, prometheus.GaugeValue, float64(count),
-			conf.Hostname, qualityName,
+			qualityName,
 		)
 	}
 }
