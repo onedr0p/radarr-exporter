@@ -43,8 +43,8 @@ OPTIONS:
    --basic-auth-enabled         Enable Basic Auth (default: false) [$RADARR_BASIC_AUTH_ENABLED]
    --basic-auth-username value  If Basic Auth is enabled, provide the username (default: "") [$RADARR_BASIC_AUTH_USERNAME]
    --basic-auth-password value  If Basic Auth is enabled, provide the password (default: "") [$RADARR_BASIC_AUTH_PASSWORD]
-   --port value                 Port the exporter will listen on (default: 9707) [$EXPORTER_PORT]
-   --log-level value            Set the default Log Level (default: "INFO") [$EXPORTER_LOG_LEVEL]
+   --port value                 Port the exporter will listen on (default: 9707) [$PORT]
+   --log-level value            Set the default Log Level (default: "INFO") [$LOG_LEVEL]
    --help, -h                   show help (default: false)
 ```
 
