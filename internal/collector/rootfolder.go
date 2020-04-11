@@ -35,9 +35,11 @@ func (collector *rootFolderCollector) Collect(ch chan<- prometheus.Metric) {
 		log.Fatal(err)
 	}
 	// Group metrics by path
-	for _, rootFolder := range rootFolders {
-		ch <- prometheus.MustNewConstMetric(collector.rootFolderMetric, prometheus.GaugeValue, float64(rootFolder.FreeSpace),
-			rootFolder.Path,
-		)
+	if len(rootFolders) > 0 {
+		for _, rootFolder := range rootFolders {
+			ch <- prometheus.MustNewConstMetric(collector.rootFolderMetric, prometheus.GaugeValue, float64(rootFolder.FreeSpace),
+				rootFolder.Path,
+			)
+		}
 	}
 }

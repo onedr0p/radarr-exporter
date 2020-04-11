@@ -35,9 +35,11 @@ func (collector *systemHealthCollector) Collect(ch chan<- prometheus.Metric) {
 		log.Fatal(err)
 	}
 	// Group metrics by source, type, message and wikiurl
-	for _, s := range systemHealth {
-		ch <- prometheus.MustNewConstMetric(collector.systemHealthMetric, prometheus.GaugeValue, float64(1),
-			s.Source, s.Type, s.Message, s.WikiURL,
-		)
+	if len(systemHealth) > 0 {
+		for _, s := range systemHealth {
+			ch <- prometheus.MustNewConstMetric(collector.systemHealthMetric, prometheus.GaugeValue, float64(1),
+				s.Source, s.Type, s.Message, s.WikiURL,
+			)
+		}
 	}
 }

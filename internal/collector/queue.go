@@ -50,11 +50,13 @@ func (collector *queueCollector) Collect(ch chan<- prometheus.Metric) {
 		}
 	}
 	// Group metrics by status, download_status and download_state
-	var queueMetrics prometheus.Metric
-	for i, s := range queueStatusAll {
-		queueMetrics = prometheus.MustNewConstMetric(collector.queueMetric, prometheus.GaugeValue, float64(i+1),
-			s.Status, s.TrackedDownloadStatus, s.TrackedDownloadState,
-		)
+	if len(queueStatusAll) > 0 {
+		var queueMetrics prometheus.Metric
+		for i, s := range queueStatusAll {
+			queueMetrics = prometheus.MustNewConstMetric(collector.queueMetric, prometheus.GaugeValue, float64(i+1),
+				s.Status, s.TrackedDownloadStatus, s.TrackedDownloadState,
+			)
+		}
+		ch <- queueMetrics
 	}
-	ch <- queueMetrics
 }
