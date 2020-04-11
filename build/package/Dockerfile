@@ -21,4 +21,5 @@ COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 COPY --from=build /build/radarr-exporter /
 
-ENTRYPOINT ["/radarr-exporter start"]
+ENTRYPOINT ["/radarr-exporter"] 
+CMD ["start"]
