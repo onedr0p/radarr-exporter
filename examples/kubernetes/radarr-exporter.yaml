@@ -32,7 +32,6 @@ spec:
   endpoints:
   - port: monitoring
     interval: 4m
-    scrapeTimeout: 1m
     path: /metrics
 ---
 kind: Deployment

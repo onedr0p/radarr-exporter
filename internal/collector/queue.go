@@ -33,7 +33,7 @@ func (collector *queueCollector) Describe(ch chan<- *prometheus.Desc) {
 func (collector *queueCollector) Collect(ch chan<- prometheus.Metric) {
 	client := radarr.NewClient(collector.config)
 	queue := radarr.Queue{}
-	if err := client.DoRequest("queue", &queue); err != nil {
+	if err := client.DoRequest("queue?page=1&includeUnknownMovieItems=true", &queue); err != nil {
 		log.Fatal(err)
 	}
 	// Calculate total pages
@@ -43,7 +43,7 @@ func (collector *queueCollector) Collect(ch chan<- prometheus.Metric) {
 	queueStatusAll = append(queueStatusAll, queue.Records...)
 	if totalPages > 1 {
 		for page := 2; page <= totalPages; page++ {
-			if err := client.DoRequest(fmt.Sprintf("%s?page=%d", "queue", page), &queue); err != nil {
+			if err := client.DoRequest(fmt.Sprintf("%s?page=%d&includeUnknownMovieItems=true", "queue", page), &queue); err != nil {
 				log.Fatal(err)
 			}
 			queueStatusAll = append(queueStatusAll, queue.Records...)
