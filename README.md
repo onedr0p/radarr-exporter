@@ -14,7 +14,8 @@ Prometheus Exporter for Radarr
 |`RADARR_BASIC_AUTH_ENABLED` |Set to `true` to enable Basic Auth                           |`false`                |
 |`RADARR_BASIC_AUTH_USERNAME`|Set to your username if enabled Basic Auth                   |                       |
 |`RADARR_BASIC_AUTH_PASSWORD`|Set to password if enabled Basic Auth                        |                       |
-|`PORT`                      |The port the exporter will listen on                         |`9707`                 |
+|`LISTEN_PORT`               |The port the exporter will listen on                         |`9707`                 |
+|`LISTEN_IP`                 |The IP the exporter will listen on                           |`0.0.0.0`              |
 |`LOG_LEVEL`                 |Set the default Log Level                                    |`INFO`                 |
 
 ### Run with Docker Compose
@@ -36,15 +37,24 @@ See [radarr-exporter.yaml](./examples/kubernetes/radarr-exporter.yaml)
 ### Run with the command line
 
 ```cmd
-./radarr-exporter start --help
+NAME:
+   radarr-exporter start -
+
+USAGE:
+   radarr-exporter start [command options] [arguments...]
+
+DESCRIPTION:
+   Radarr Exporter
+
 OPTIONS:
+   --listen-port value          Port the exporter will listen on (default: 9707) [$LISTEN_PORT]
+   --listen-ip value            IP the exporter will listen on (default: "0.0.0.0") [$LISTEN_IP]
+   --log-level value            Set the default Log Level (default: "INFO") [$LOG_LEVEL]
    --url value                  Full URL to Radarr (default: "http://127.0.0.1:7878") [$RADARR_URL]
    --api-key value              Radarr's API Key (default: "") [$RADARR_APIKEY]
-   --basic-auth-enabled         Enable Basic Auth (default: false) [$RADARR_BASIC_AUTH_ENABLED]
+   --basic-auth-enabled         Enable Basic Auth (default: true) [$RADARR_BASIC_AUTH_ENABLED]
    --basic-auth-username value  If Basic Auth is enabled, provide the username (default: "") [$RADARR_BASIC_AUTH_USERNAME]
    --basic-auth-password value  If Basic Auth is enabled, provide the password (default: "") [$RADARR_BASIC_AUTH_PASSWORD]
-   --port value                 Port the exporter will listen on (default: 9707) [$PORT]
-   --log-level value            Set the default Log Level (default: "INFO") [$LOG_LEVEL]
    --help, -h                   show help (default: false)
 ```
 

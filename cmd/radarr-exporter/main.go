@@ -37,11 +37,18 @@ func main() {
 			Description: strings.Title("Radarr Exporter"),
 			Flags: []cli.Flag{
 				&cli.IntFlag{
-					Name:     "port",
+					Name:     "listen-port",
 					Usage:    "Port the exporter will listen on",
 					Value:    9707,
 					Required: false,
-					EnvVars:  []string{"PORT"},
+					EnvVars:  []string{"LISTEN_PORT"},
+				},
+				&cli.StringFlag{
+					Name:     "listen-ip",
+					Usage:    "IP the exporter will listen on",
+					Value:    "0.0.0.0",
+					Required: false,
+					EnvVars:  []string{"LISTEN_IP"},
 				},
 				&cli.StringFlag{
 					Name:     "log-level",
@@ -138,8 +145,11 @@ func start(c *cli.Context) (err error) {
 	http.Handle("/metrics", handler)
 
 	// Serve up the metrics
-	log.Infof("Listening on localhost:%d", c.Int("port"))
-	httpErr := http.ListenAndServe(fmt.Sprintf(":%d", c.Int("port")), logRequest(http.DefaultServeMux))
+	log.Infof("Listening on %s:%d", c.String("listen-ip"), c.Int("listen-port"))
+	httpErr := http.ListenAndServe(
+		fmt.Sprintf("%s:%d", c.String("listen-ip"), c.Int("listen-port")),
+		logRequest(http.DefaultServeMux),
+	)
 	if httpErr != nil {
 		return httpErr
 	}
