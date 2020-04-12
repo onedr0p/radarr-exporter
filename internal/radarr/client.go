@@ -32,12 +32,12 @@ func NewClient(c *cli.Context) *Client {
 
 // DoRequest - Take a HTTP Request and return Unmarshaled data
 func (c *Client) DoRequest(endpoint string, target interface{}) error {
-	apiEndpoint := fmt.Sprintf("%s/api/v3/%s", c.config.String("url"), endpoint)
+	radarrApiUrl := fmt.Sprintf("%s/api/v3/%s", c.config.String("url"), endpoint)
 
-	log.Infof("Sending HTTP request to %s", apiEndpoint)
+	log.Infof("Sending HTTP request to %s", radarrApiUrl)
 
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: c.config.Bool("disable-ssl-verify")}
-	req, err := http.NewRequest("GET", apiEndpoint, nil)
+	req, err := http.NewRequest("GET", radarrApiUrl, nil)
 	if c.config.Bool("basic-auth-enabled") && c.config.String("basic-auth-username") != "" && c.config.String("basic-auth-password") != "" {
 		req.Header.Add("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(c.config.String("basic-auth-username")+":"+c.config.String("basic-auth-password"))))
 	}
@@ -53,7 +53,7 @@ func (c *Client) DoRequest(endpoint string, target interface{}) error {
 		log.Fatalf("An error has occurred during retrieving Radarr statistics %v", err)
 		return err
 	}
-	if resp.StatusCode != 200 {
+	if !(resp.StatusCode >= 200 && resp.StatusCode < 300) {
 		errMsg := "An error has occurred during retrieving Radarr statistics HTTP statuscode not 200"
 		log.Fatal(errMsg)
 		return errors.New(errMsg)
