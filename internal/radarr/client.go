@@ -54,7 +54,7 @@ func (c *Client) DoRequest(endpoint string, target interface{}) error {
 		return err
 	}
 	if !(resp.StatusCode >= 200 && resp.StatusCode < 300) {
-		errMsg := "An error has occurred during retrieving Radarr statistics HTTP statuscode not 200"
+		errMsg := fmt.Sprintf("An error has occurred during retrieving Radarr statistics HTTP statuscode %d", resp.StatusCode)
 		log.Fatal(errMsg)
 		return errors.New(errMsg)
 	}
